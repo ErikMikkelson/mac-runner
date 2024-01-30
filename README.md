@@ -7,6 +7,15 @@ It encapsulates a range of Nix goodies that I use to declutter and bring order t
 - Shell aliases and helper scripts
 - [NixOS](#nixos-configuration)
 
+First install and update
+------------------------
+
+Just run this install script from your terminal:
+
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ErikMikkelson/mac-runner/HEAD/install.sh)"
+```
+
 What I run to apply my [nix-darwin] configuration (which in turn applies my [Home Manager][hm] config):
 
 ```shell
