@@ -14,7 +14,7 @@
   nix = {
     package = pkgs.nixUnstable;
     extraOptions = ''
-      experimental-features = nix-command flakes
+      experimental-features = nix-command flakes configurable-impure-env auto-allocate-uids
       keep-outputs = true
       keep-derivations = true
     '';
@@ -66,6 +66,6 @@
   };
 
   system = {
-    stateVersion = "22.11";
+    stateVersion = "23.11";
   };
 }
