@@ -26,7 +26,7 @@
 
       stateVersion = "23.11";
       system = "aarch64-darwin";
-      username = "lucperkins";
+      username = "erikm";
       caches = {
         nixos-org = {
           cache = "https://cache.nixos.org";
