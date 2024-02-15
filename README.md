@@ -67,25 +67,20 @@ nix copy --from https://cache.nixos.org /nix/store/52k8rqihijagzc2lkv17f4lw9kmh4
 ## For MacOS
 I've tested these instructions on a fresh Macbook Pro as of February 2024.
 
-### 1. Install dependencies
-```sh
-xcode-select --install
-```
+### 1. Install dependencies & clone the repository
 
-### 2. Install Nix
-Thank you for the installer, [Determinate Systems](https://determinate.systems/)!
-```sh
-curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-```
+ Just run this install script from your terminal:
 
-### 3. Clone the repository
+ ```
+ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ErikMikkelson/mac-runner/HEAD/install.sh)"
+ ```
 
-### 4. Make apps executable
+### 2. Make apps executable
 ```sh
 find apps/aarch64-darwin -type f \( -name apply -o -name build -o -name build-switch -o -name create-keys -o -name copy-keys -o -name check-keys \) -exec chmod +x {} \;
 ```
 
-### 5. Apply your current user info
+### 3. Apply your current user info
 Run this Nix app to replace stub values with your username, full name, and email.
 ```sh
 nix run .#apply
@@ -95,7 +90,7 @@ nix run .#apply
 >
 > You must run `git add .` first.
 
-### 6. Decide what packages to install
+### 4. Decide what packages to install
 You can search for packages on the [official NixOS website](https://search.nixos.org/packages).
 
 **Review these files**
@@ -105,7 +100,7 @@ You can search for packages on the [official NixOS website](https://search.nixos
 * [ `modules/nixos/packages.nix`](./modules/nixos/packages.nix)
 * [`modules/shared/packages/nix`](./modules/shared/packages.nix)
 
-### 7. Review your shell configuration
+### 5. Review your shell configuration
 Add anything from your existing `~/.zshrc`, or just review the new configuration.
 
 **Review these files**
@@ -113,7 +108,7 @@ Add anything from your existing `~/.zshrc`, or just review the new configuration
 * [`modules/darwin/home-manager`](./modules/darwin/home-manager.nix)
 * [`modules/shared/home-manager`](./modules/shared/home-manager.nix)
 
-### 9. Install configuration
+### 6. Install configuration
 First-time installations require you to move the current `/etc/nix/nix.conf` out of the way.
 ```sh
 [ -f /etc/nix/nix.conf ] && sudo mv /etc/nix/nix.conf /etc/nix/nix.conf.before-nix-darwin
@@ -129,7 +124,7 @@ Then, if you want to ensure the build works before deploying the configuration, 
 nix run .#build
 ```
 
-### 10. Make changes
+### 7. Make changes
 Finally, alter your system with this command:
 ```sh
 nix run .#build-switch
