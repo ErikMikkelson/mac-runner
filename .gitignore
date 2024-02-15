@@ -1,2 +1,4 @@
 # Nix artifacts
 result*
+result
+.DS_Store

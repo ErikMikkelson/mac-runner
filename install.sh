@@ -180,13 +180,6 @@ fi
 
 cd $MR_CHECKOUT
 
-mkdir -p "/Users/$USER/.config/zsh/config.d/"
-cp "config/p10k.zsh" "/Users/$USER/.config/zsh/config.d/"
-
-ohai "Change config to current user $USER"
-sed -i -- "s/USERNAME/$USER/" flake.nix
-sed -i -- "s/USERNAME/$USER/" darwin-configuration.nix
-
 if ! [[ -x "$(command -v nix-env)" ]]
 then
     ohai "Installing nix. Answer always y."
@@ -198,7 +191,3 @@ then
     ohai "Please restart terminal to finish Nix installation"
     exit 1
 fi
-
-ohai "Switching to new system configuration"
-have_sudo_access
-nix develop --command reload
