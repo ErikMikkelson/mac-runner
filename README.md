@@ -1,46 +1,159 @@
-# Nome
+## Overview
+Nix is a powerful package manager for Linux and Unix systems that ensures reproducible, declarative, and reliable software management. 
 
-Nome is my **N**ix h**ome**.
-It encapsulates a range of Nix goodies that I use to declutter and bring order to my entire laptop environment, including:
+This repository contains configuration for a general-purpose development environment that runs Nix on MacOS, specifically for mobile app development
 
-- My [nix-darwin] and [Home Manager][hm] configuration
-- Shell aliases and helper scripts
-- [NixOS](#nixos-configuration)
+## Table of Contents
+- [Overview](#overview)
+- [Layout](#layout)
+- [Features](#features)
+- [Disclaimer](#disclaimer)
+- [Installing](#installing)
+  - [For MacOS](#for-macos)
+    - [Install dependencies](#1-install-dependencies)
+    - [Install Nix](#2-install-nix)
+    - [Clone the repository](#3-clone-the-repository)
+    - [Apply your current user info](#4-apply-your-current-user-info)
+    - [Decide what packages to install](#5-decide-what-packages-to-install)
+    - [Review your shell configuration](#7-review-your-shell-configuration)
+    - [Install configuration](#9-install-configuration)
+    - [Make changes](#10-make-changes)
+- [Deploying Changes to Your System](#deploying-changes-to-your-system)
+  - [For all platforms](#for-all-platforms)
+  - [Update Dependencies](#update-dependencies)
 
-First install and update
-------------------------
-
-Just run this install script from your terminal:
-
+## Layout
 ```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ErikMikkelson/mac-runner/HEAD/install.sh)"
-```
-
-What I run to apply my [nix-darwin] configuration (which in turn applies my [Home Manager][hm] config):
-
-```shell
-nix develop --command reload
-```
-
-That's right: with Nix installed and [flakes enabled][flakes], this is all that I need to run to stand up a new machine according to my exact specifications, including configuration for [Vim](./nix-darwin/home-manager/neovim.nix), [tmux](./nix-darwin/home-manager/tmux.nix), [zsh](./nix-darwin/home-manager/zsh.nix), [Visual Studio Code](./nix-darwin/home-manager/vscode.nix), [Git](./nix-darwin/home-manager/git.nix), and more.
-This has enabled me to eliminate [Homebrew] from my machine.
-
-## NixOS configuration
-
-My Nome flake also exports a [NixOS](./nixos) configuration that I use for experimentation.
-To apply that config on any NixOS machine:
-
-```shell
-nixos-rebuild switch --flake "github:the-nix-way"
+.
+├── apps         # Nix commands used to bootstrap and build configuration
+├── hosts        # Host-specific configuration
+├── modules      # MacOS and nix-darwin, NixOS, and shared configuration
+├── overlays     # Drop an overlay file in this dir, and it runs. So far, mainly patches.
 ```
 
-## Scope
+## Features
+- **Nix Flakes**: 100% flake driven, no `configuration.nix`, [no Nix channels](#why-nix-flakes)─ just `flake.nix`
+- **MacOS Dream Setup**: Fully declarative MacOS, including UI, dock and MacOS App Store apps possible
+- **Simple Bootstrap**: Simple Nix commands to start from zero
+- **Managed Homebrew**: Zero maintenance homebrew environment with `nix-darwin` and `nix-homebrew`
+- **Built In Home Manager**: `home-manager` module for seamless configuration (no extra clunky CLI steps)
+- **Nix Overlays**: [Auto-loading of Nix overlays]: drop a file in a dir and it runs _(great for patches!)_
+- **Declarative Sync**: No-fuss Syncthing: managed keys, certs, and configuration across all platforms
+- **Simplicity and Readability**: Optimized for simplicity and readability in all cases, not small files everywhere
 
-I should make it clear that this project is a personal project and not necessarily intended as a blueprint or a reproducible template.
-I do hope that you find some inspiration in it, but don't necessarily interpret what you see here as best practices.
-It's just an evolving project that I find quite useful and it's meant above all to show what Nix is capable of.
+## Disclaimer
+Installing Nix on MacOS will create an entirely separate volume. It will exceed many gigabytes in size. 
 
-[flakes]: https://nixos.wiki/wiki/Flakes
-[hm]: https://github.com/nix-community/home-manager
-[homebrew]: https://brew.sh
-[nix-darwin]: https://github.com/LnL7/nix-darwin
+Some folks don't like this. If this is you, turn back now!
+
+> [!NOTE]
+> Don't worry; you can always [uninstall](https://github.com/DeterminateSystems/nix-installer#uninstalling) Nix later.
+
+
+# Installing
+> [!IMPORTANT]
+> Note: Nix 2.18 currently [has a bug](https://github.com/NixOS/nix/issues/9052) that impacts this repository.
+
+For now, if you run into errors like this:
+```
+error: path '/nix/store/52k8rqihijagzc2lkv17f4lw9kmh4ki6-gnugrep-3.11-info' is not valid
+```
+
+Run `nix copy` to make the path valid.
+```
+nix copy --from https://cache.nixos.org /nix/store/52k8rqihijagzc2lkv17f4lw9kmh4ki6-gnugrep-3.11-info
+```
+
+## For MacOS
+I've tested these instructions on a fresh Macbook Pro as of February 2024.
+
+### 1. Install dependencies
+```sh
+xcode-select --install
+```
+
+### 2. Install Nix
+Thank you for the installer, [Determinate Systems](https://determinate.systems/)!
+```sh
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+```
+
+### 3. Clone the repository
+
+### 4. Make apps executable
+```sh
+find apps/aarch64-darwin -type f \( -name apply -o -name build -o -name build-switch -o -name create-keys -o -name copy-keys -o -name check-keys \) -exec chmod +x {} \;
+```
+
+### 5. Apply your current user info
+Run this Nix app to replace stub values with your username, full name, and email.
+```sh
+nix run .#apply
+```
+> [!NOTE]
+> If you're using a git repository, only files in the working tree will be copied to the [Nix Store](https://zero-to-nix.com/concepts/nix-store).
+>
+> You must run `git add .` first.
+
+### 6. Decide what packages to install
+You can search for packages on the [official NixOS website](https://search.nixos.org/packages).
+
+**Review these files**
+
+* [`modules/darwin/casks.nix`](./modules/darwin/casks.nix)
+* [`modules/darwin/packages.nix`](./modules/darwin/packages.nix)
+* [ `modules/nixos/packages.nix`](./modules/nixos/packages.nix)
+* [`modules/shared/packages/nix`](./modules/shared/packages.nix)
+
+### 7. Review your shell configuration
+Add anything from your existing `~/.zshrc`, or just review the new configuration.
+
+**Review these files**
+
+* [`modules/darwin/home-manager`](./modules/darwin/home-manager.nix)
+* [`modules/shared/home-manager`](./modules/shared/home-manager.nix)
+
+### 9. Install configuration
+First-time installations require you to move the current `/etc/nix/nix.conf` out of the way.
+```sh
+[ -f /etc/nix/nix.conf ] && sudo mv /etc/nix/nix.conf /etc/nix/nix.conf.before-nix-darwin
+```
+
+> [!NOTE]
+> If you're using a git repository, only files in the working tree will be copied to the [Nix Store](https://zero-to-nix.com/concepts/nix-store).
+>
+> You must run `git add .` first.
+
+Then, if you want to ensure the build works before deploying the configuration, run:
+```sh
+nix run .#build
+```
+
+### 10. Make changes
+Finally, alter your system with this command:
+```sh
+nix run .#build-switch
+```
+> [!WARNING]
+> On MacOS, your `.zshrc` file will be replaced with the [`zsh` configuration](./templates/starter/modules/shared/home-manager.nix#L8) from this repository. So make some changes here first if you'd like.
+
+
+# Deploying changes to your system
+With Nix, changes to your system are made by 
+- editing your system configuration
+- building the [system closure](https://zero-to-nix.com/concepts/closures)
+- creating and switching to it _(i.e creating a [new generation](https://nixos.wiki/wiki/Terms_and_Definitions_in_Nix_Project#generation))_
+
+## For all platforms
+```sh
+nix run .#build-switch
+```
+
+## Update dependencies
+```sh
+nix flake update
+```
+
+## Thanks
+Based on https://github.com/dustinlyons/nixos-config under MIT License
+
